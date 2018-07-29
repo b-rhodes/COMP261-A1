@@ -1,7 +1,5 @@
 //import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.*;
 import java.util.ArrayList;
@@ -27,7 +25,10 @@ public class Main extends GUI {
     private Location origin = Location.newFromLatLon(-36.847622, 174.763444 );
 
     // The scale
-    private double scale = 150;
+    private double scale = 90;
+
+    // The highlighted node
+    private Node highlightN;
 
     /**
      * Constructor
@@ -107,25 +108,108 @@ public class Main extends GUI {
      * @param g - The graphics object
      */
     protected void redraw(Graphics g) { // TODO: Only draw onscreen things.
+        // Don't draw if we have no map
         if(segmentList == null) {return;}
 
-        // Draw the segments
+        // Draw segments
         segmentList.forEach(segment -> segment.draw(g, origin, scale));
 
         // Draw the nodes
         nodeMap.keySet().stream().map(key -> nodeMap.get(key)).forEach(node -> node.draw(g, origin, scale));
+
+        //Highlighted:
+        if(highlightN == null) { return; } // Return if there is no highlighted node
+        Object[] rNames = highlightN.getSegmentList().stream().map(s->s.getRoad()).distinct().map(r->r.getRoadName()).toArray(); // Get an array of all the road names attached to the node
+        String nodeDesc = "Intersection ID: " + highlightN.getNodeID() + "\nRoads:";
+
+        for(Object r : rNames) { // Add road names
+            nodeDesc += r + ", ";
+        }
+
+        nodeDesc = nodeDesc.substring(0, nodeDesc.length()-2); // Shave the last ", " off the string
+
+        getTextOutputArea().setText(nodeDesc); // Print the string to the output area
     }
 
-    protected void onClick(MouseEvent m) {
-        getTextOutputArea().setText("Click!");
+
+    /**
+     * Is called whenever a navigation button is pressed. An instance of the
+     * Move enum is passed, representing the button clicked by the user.
+     *
+     * @param m - The movement value. Can be: NORTH, SOUTH, EAST, WEST, ZOOM_IN, ZOOM_OUT
+     */
+    protected void onMove(Move m) {
+        // How much to change by:
+        int d = 10;
+        double s = 10;
+
+        // The change in x/y/scale
+        int dx = 0;
+        int dy = 0;
+        double ds = 0;
+
+        // Work out what is being changed, and by how much.
+        switch (m) {
+            case NORTH:
+                dy -= d;
+                break;
+
+            case SOUTH:
+                dy += d;
+                break;
+
+            case EAST:
+                dx += d;
+                break;
+
+            case WEST:
+                dx -= d;
+                break;
+
+            case ZOOM_IN:
+                ds += s;
+                break;
+
+            case ZOOM_OUT:
+                ds -= s;
+                break;
+        }
+
+        // Get the new location (relative to the screen)
+        Point p = origin.asPoint(origin, scale);
+        p.x += dx;
+        p.y += dy;
+
+        // Convert the location relative to the screen to a Location Object with a latitude and longitude.
+        origin = Location.newFromPoint(p, origin, scale);
+
+        // Change the scale.
+        scale += ds;
     }
 
     protected void onSearch() {
         getTextOutputArea().setText("Search!");
     }
 
-    protected void onMove(Move m) {
-        getTextOutputArea().setText("Move!");
+    protected void onClick(MouseEvent m) {
+        Point click = new Point(m.getX(), m.getY());
+        double lowest = 1000000;
+
+        Node closest = highlightN;
+
+        for(int n : nodeMap.keySet()) {
+            Node node = nodeMap.get(n);
+            double dist = node.getDist(click, origin, scale);
+            if(dist < lowest) {
+                lowest = dist;
+                closest = node;
+            }
+        }
+
+        closest.highlight();
+        if(highlightN != null) { highlightN.highlight(); }
+        highlightN = closest;
+        //todo : Make highlighted road equal to none.
     }
 
     public static void main(String[] args) {new Main();}

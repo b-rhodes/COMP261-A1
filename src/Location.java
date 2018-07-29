@@ -61,10 +61,8 @@ public class Location {
 	 * Create a new Location object from a given Point object, as well as the
 	 * origin and scale. This is effectively the opposite of the asPoint method.
 	 */
-	public static Location newFromPoint(Point point, Location origin,
-			double scale) {
-		return new Location(point.x / scale + origin.x, origin.y - point.y
-				/ scale);
+	public static Location newFromPoint(Point point, Location origin, double scale) {
+		return new Location(point.x / scale + origin.x, origin.y - point.y / scale);
 	}
 
 	/**

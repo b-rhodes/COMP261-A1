@@ -11,6 +11,9 @@ public class Node {
     // The location of the node
     private Location loc; // TODO: Might need to keep the latitude/longitude. Unsure.
 
+    // Is the node highlighted
+    private boolean highlight = false;
+
     // The list of segments connected to this node
     private ArrayList<Segment> segmentList = new ArrayList<>();
 
@@ -35,10 +38,36 @@ public class Node {
      * @param scale - The current scale of the map
      */
     public void draw(Graphics g, Location origin, double scale) {
-        Point p = loc.asPoint(origin, scale);
-        g.setColor(Color.BLUE);
+        // Draw the Segments
+        //segmentList.forEach(segment -> segment.draw(g, origin, scale));
 
-        g.fillRect(p.x, p.y, 5, 5);
+        // Draw the node
+        if(highlight) { // draw the node as yellow and print out the road names of its segments
+            g.setColor(Color.YELLOW);
+        } else { // draw the node as usual
+            g.setColor(Color.BLUE); // todo: color
+        }
+        Point p = loc.asPoint(origin, scale);
+        int size = 6;
+        g.fillOval(p.x - size / 2, p.y - size / 2, size, size);
+    }
+
+    /**
+     * @param other - The node we're finding the distance from
+     * @param origin - The origin point of the map
+     * @param scale - The current scale of the map
+     * @return returns the distance from the other node
+     */
+    public double getDist(Point other, Location origin, double scale) {
+        Point p = loc.asPoint(origin, scale);
+        return Math.abs(p.x - other.x) + Math.abs(p.y - other.y);
+    }
+
+    /**
+     * Toggle whether or not the node is highlighted
+     */
+    public void highlight() {
+        highlight = !highlight;
     }
 
 
