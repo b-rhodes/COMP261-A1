@@ -12,7 +12,9 @@ import java.util.function.*;
 import java.util.Map;
 
 /**
- * TODO: This comment
+ * A mapping class, which puts a map (loaded from a file) onto the screen.
+ * The map can be searched for roads, and you can select intersections to find out what roads
+ * meet at that intersection.
  */
 public class Main extends GUI {
 
@@ -30,13 +32,15 @@ public class Main extends GUI {
     // The highlighted node
     private Node highlightN;
 
+    // The highlighted segments;
+    private List<Road> highlightR;
+
     /**
      * Constructor
      *
      * Just runs initialise (in the GUI class).
      */
     public Main() {
-        // TODO: This?
         super();
     }
 
@@ -60,7 +64,7 @@ public class Main extends GUI {
         // Streams the lines of the file into Nodes, which are put into a map (node
         nodeMap = getStream(nodes).map(array ->
                 new Node(Integer.parseInt(array[0]), Double.parseDouble(array[1]), Double.parseDouble(array[2])))
-                .collect(Collectors.toMap(node->node.getNodeID(), Function.identity())); //TODO: Use .collect to put into a collection
+                .collect(Collectors.toMap(node->node.getNodeID(), Function.identity()));
 
         // Stream the roads file
         roadMap = getStream(roads).skip(1).map(array ->
@@ -118,17 +122,26 @@ public class Main extends GUI {
         nodeMap.keySet().stream().map(key -> nodeMap.get(key)).forEach(node -> node.draw(g, origin, scale));
 
         //Highlighted:
-        if(highlightN == null) { return; } // Return if there is no highlighted node
-        Object[] rNames = highlightN.getSegmentList().stream().map(s->s.getRoad()).distinct().map(r->r.getRoadName()).toArray(); // Get an array of all the road names attached to the node
-        String nodeDesc = "Intersection ID: " + highlightN.getNodeID() + "\nRoads:";
-
-        for(Object r : rNames) { // Add road names
-            nodeDesc += r + ", ";
+        if(highlightN != null) { // Return if there is no highlighted node
+            Object[] rNames = highlightN.getSegmentList().stream().map(s -> s.getRoad()).distinct().map(r -> r.getRoadName()).toArray(); // Get an array of all the road names attached to the node
+            String nodeDesc = "Intersection ID: " + highlightN.getNodeID() + "\nRoads:";
+            for (Object r : rNames) { // Add road names
+                nodeDesc += r + ", ";
+            }
+            nodeDesc = nodeDesc.substring(0, nodeDesc.length() - 2); // Shave the last ", " off the string
+            getTextOutputArea().setText(nodeDesc); // Print the string to the output area
+        } else if(highlightR != null) {
+            String roadDesc = "";
+            for(Road r : highlightR) {
+                roadDesc += "Road ID: " + r.getRoadID() +
+                            " | Road Name: " + r.getRoadName() +
+                            " | City: " + r.getRoadCity() +
+                            " | Speed Limit: " + r.getSpeedLimit() +
+                            " | One Way: " + ((r.getOneway()) ? "Yes" : "No ") +
+                            "\n";
+            }
+            getTextOutputArea().setText(roadDesc); // Print the string to the output area
         }
-
-        nodeDesc = nodeDesc.substring(0, nodeDesc.length()-2); // Shave the last ", " off the string
-
-        getTextOutputArea().setText(nodeDesc); // Print the string to the output area
     }
 
 
@@ -187,16 +200,39 @@ public class Main extends GUI {
         scale += ds;
     }
 
+    /**
+     * Is called whenever the search box is updated. Use getSearchBox to get the
+     * JTextField object that is the search box itself.
+     */
     protected void onSearch() {
-        getTextOutputArea().setText("Search!");
+        // Unhighlight everything
+        if(highlightR != null) {
+            highlightR.stream().forEach(r->r.getSegmentList().stream().forEach(s->s.highlight()));
+        }
+
+        // Get the search
+        String search = getSearchBox().getText();
+        // Get the road
+        highlightR = roadMap.keySet().stream().map(k->roadMap.get(k)).filter(r->r.getRoadName().equals(search)).collect(Collectors.toList()); //todo : change this so that it works with trie
+        // Highlight the new road
+        highlightR.stream().forEach(r->r.getSegmentList().stream().forEach(s->s.highlight()));
+        // Remove highlighted nodes
+        if(highlightN != null) { highlightN.highlight(); }
+        highlightN = null;
+        //TODO : Print out the rest of the useful info?
     }
 
+    /**
+     * Is called when the mouse is clicked (actually, when the mouse is
+     * released), and is passed the MouseEvent object for that click.
+     */
     protected void onClick(MouseEvent m) {
+        // Get the click point
         Point click = new Point(m.getX(), m.getY());
+
+        // Find the closest noce
         double lowest = 1000000;
-
         Node closest = highlightN;
-
         for(int n : nodeMap.keySet()) {
             Node node = nodeMap.get(n);
             double dist = node.getDist(click, origin, scale);
@@ -206,10 +242,14 @@ public class Main extends GUI {
             }
         }
 
+        // highlight that node and unhighlight the old one
         closest.highlight();
         if(highlightN != null) { highlightN.highlight(); }
         highlightN = closest;
-        //todo : Make highlighted road equal to none.
+        if(highlightR != null) {
+            highlightR.stream().forEach(r->r.getSegmentList().stream().forEach(s->s.highlight()));
+            highlightR = null;
+        }
     }
 
     public static void main(String[] args) {new Main();}

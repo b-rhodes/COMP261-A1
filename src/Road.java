@@ -37,11 +37,11 @@ public class Road {
      * @param type - Type of road
      * @param roadName - Name of road
      * @param roadCity - City the road is in
-     * @param oneway - TODO:
+     * @param oneway - Whether or not the road is one way
      * @param speedLimit - Speed limit on the road
-     * @param notforcar - TODO:
-     * @param notforpede - TODO: These things should maybe be ints rather than booleans (for constructor only)
-     * @param notforbicy - TODO:
+     * @param notforcar - Whether or not cars are allowed on the road
+     * @param notforpede - Whether or not pedestrians are allowed on the road
+     * @param notforbicy - Whether or not bicycles are allowed on the road
      */
     public Road(int roadID, int type, String roadName, String roadCity, boolean oneway, int speedLimit, boolean notforcar, boolean notforpede, boolean notforbicy) {
 

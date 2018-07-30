@@ -9,7 +9,7 @@ public class Node {
     // The ID of the node
     private int nodeID;
     // The location of the node
-    private Location loc; // TODO: Might need to keep the latitude/longitude. Unsure.
+    private Location loc;
 
     // Is the node highlighted
     private boolean highlight = false;
@@ -43,9 +43,9 @@ public class Node {
 
         // Draw the node
         if(highlight) { // draw the node as yellow and print out the road names of its segments
-            g.setColor(Color.YELLOW);
+            g.setColor(Color.RED);
         } else { // draw the node as usual
-            g.setColor(Color.BLUE); // todo: color
+            g.setColor(Color.BLUE);
         }
         Point p = loc.asPoint(origin, scale);
         int size = 6;
