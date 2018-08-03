@@ -1,6 +1,7 @@
 package Trie;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A trie is an ordered tree data structure.
@@ -34,7 +35,21 @@ public class Trie<T> {
      * @param data - The data to be indexed
      */
     public void add(String name, T data) {
-        root.add(name, data);
+        char[] word = name.toCharArray();
+        TrieNode<T> node = root;
+
+        for (char c : word) {
+            // If the correct child node doesn't exist, make it.
+            if(!node.getChildren().containsKey(c)) {
+                node.getChildren().put(c, new TrieNode<T>(node.getPrefix() + c));
+            }
+
+            // Move onto the child node
+            node = node.getChildren().get(c);
+        }
+
+        // Add the data to the node
+        node.getData().add(data);
     }
 
     /**
@@ -44,7 +59,45 @@ public class Trie<T> {
      * @return An ArrayList containing all objects which start with the prefix
      */
     public ArrayList<T> get(String name) {
-        return root.get(name);
+        char[] word = name.toCharArray();
+        TrieNode<T> node = root;
+
+        for(char c : word) {
+            // If there is no correct child, return null
+            if(!node.getChildren().containsKey(c)) {return null;}
+            // Otherwise mode on to the child
+            node = node.getChildren().get(c);
+        }
+        // Return the data
+        return node.getData();
+    }
+
+    /**
+     * @param name - The name of the object to be searched
+     * @return A list containing all objects which begin with the searched name.
+     */
+    public ArrayList<T> getAll(String name) {
+        ArrayList<T> results = new ArrayList<T>();
+        char[] word = name.toCharArray();
+        TrieNode<T> node = root;
+
+        for(char c : word) {
+            // If there is no correct child, return null
+            if(!node.getChildren().containsKey(c)) {return null;}
+            // Otherwise mode on to the child
+            node = node.getChildren().get(c);
+        }
+
+        getAllFrom(node, results);
+        return results;
+    }
+
+    public void getAllFrom(TrieNode<T> node, List<T> results) {
+        results.addAll(node.getData());
+
+        node.getChildren().keySet().stream()
+                .map(k->node.getChildren().get(k))
+                .forEach(child->getAllFrom(child, results));
     }
 
 }

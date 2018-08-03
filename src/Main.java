@@ -1,4 +1,6 @@
 //import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import Trie.Trie;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.*;
@@ -22,12 +24,14 @@ public class Main extends GUI {
     private Map<Integer, Road> roadMap;
     private Map<Integer, Node> nodeMap;
     private List<Segment> segmentList;
+    private Trie<Road> roadTrie;
 
     // The Origin location
     private Location origin = Location.newFromLatLon(-36.847622, 174.763444 );
 
     // The scale
     private double scale = 90;
+    private double zoomFactor = 1;
 
     // The highlighted node
     private Node highlightN;
@@ -85,6 +89,12 @@ public class Main extends GUI {
         }
 
         //TODO: Polygons!
+
+        // Add roads to the Trie
+        roadTrie = new Trie<Road>();
+        roadMap.keySet().stream()
+                .map(k->roadMap.get(k))
+                .forEach(r -> roadTrie.add(r.getRoadName(), r));
     }
 
     /**
@@ -136,8 +146,10 @@ public class Main extends GUI {
                 roadDesc += "Road ID: " + r.getRoadID() +
                             " | Road Name: " + r.getRoadName() +
                             " | City: " + r.getRoadCity() +
-                            " | Speed Limit: " + r.getSpeedLimit() +
+                            " | Speed Limit: " + r.getSpeedLimitText() +
+                            " | Road Type: " + r.getRoadClass() +
                             " | One Way: " + ((r.getOneway()) ? "Yes" : "No ") +
+                            " | " + r.getCarPedeBike() +
                             "\n";
             }
             getTextOutputArea().setText(roadDesc); // Print the string to the output area
@@ -154,12 +166,12 @@ public class Main extends GUI {
     protected void onMove(Move m) {
         // How much to change by:
         int d = 10;
-        double s = 10;
+        double s = 0.1;
 
         // The change in x/y/scale
         int dx = 0;
         int dy = 0;
-        double ds = 0;
+        double dz = 0;
 
         // Work out what is being changed, and by how much.
         switch (m) {
@@ -180,11 +192,11 @@ public class Main extends GUI {
                 break;
 
             case ZOOM_IN:
-                ds += s;
+                dz += s;
                 break;
 
             case ZOOM_OUT:
-                ds -= s;
+                dz -= s;
                 break;
         }
 
@@ -197,7 +209,10 @@ public class Main extends GUI {
         origin = Location.newFromPoint(p, origin, scale);
 
         // Change the scale.
-        scale += ds;
+        zoomFactor += dz;
+        if(dz != 0) {
+            scale = zoomFactor * 90;
+        }
     }
 
     /**
@@ -213,7 +228,13 @@ public class Main extends GUI {
         // Get the search
         String search = getSearchBox().getText();
         // Get the road
-        highlightR = roadMap.keySet().stream().map(k->roadMap.get(k)).filter(r->r.getRoadName().equals(search)).collect(Collectors.toList()); //todo : change this so that it works with trie
+        highlightR = roadTrie.getAll(search);
+        if(highlightR == null) {
+            return;
+        }
+        if (highlightR.stream().map(r->r.getRoadName()).anyMatch(s->s.equals(search))) {
+            highlightR = roadTrie.get(search);
+        }
         // Highlight the new road
         highlightR.stream().forEach(r->r.getSegmentList().stream().forEach(s->s.highlight()));
         // Remove highlighted nodes
