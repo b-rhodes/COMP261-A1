@@ -73,6 +73,7 @@ public class Trie<T> {
     }
 
     /**
+     * Returns a list containing all the objects contained by the node which contains the name (and all that node's children)
      * @param name - The name of the object to be searched
      * @return A list containing all objects which begin with the searched name.
      */
@@ -92,6 +93,11 @@ public class Trie<T> {
         return results;
     }
 
+    /**
+     * Adds all objects contained in the node, and all it's child nodes to the "results" list.
+     * @param node - The node to get all objects from
+     * @param results - The list to add all the objects to
+     */
     public void getAllFrom(TrieNode<T> node, List<T> results) {
         results.addAll(node.getData());
 

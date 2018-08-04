@@ -3,6 +3,7 @@ import Trie.Trie;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,10 @@ public class Main extends GUI {
 
     // The highlighted segments;
     private List<Road> highlightR;
+
+    // The x and y of a mouse press or drag
+    private int dragInitX;
+    private int dragInitY;
 
     /**
      * Constructor
@@ -271,6 +276,43 @@ public class Main extends GUI {
             highlightR.stream().forEach(r->r.getSegmentList().stream().forEach(s->s.highlight()));
             highlightR = null;
         }
+    }
+
+    /**
+     * Allows the user to scroll using the mouse wheel.
+     * @param e - The MouseWheelEvent which describes the scrolling
+     */
+    protected void onScroll(MouseWheelEvent e) {
+        zoomFactor += e.getPreciseWheelRotation() * -0.1;
+        scale = zoomFactor * 90;
+    }
+
+    /**
+     * Allows the user to pan using a mouse drag.
+     * @param e - The mouse event which describes the drag
+     */
+    protected void onDrag(MouseEvent e) {
+        // Get the change in x and y.
+        int dx = dragInitX - e.getX();
+        int dy = dragInitY - e.getY();
+        dragInitX = e.getX();
+        dragInitY = e.getY();
+        // Get the new location (relative to the screen)
+        Point p = origin.asPoint(origin, scale);
+        p.x += dx;
+        p.y += dy;
+
+        // Convert the location relative to the screen to a Location Object with a latitude and longitude.
+        origin = Location.newFromPoint(p, origin, scale);
+    }
+
+    /**
+     * Sets the initial x and y location for when the mouse is dragged.
+     * @param e - The mouse event describing the press
+     */
+    protected void onPress(MouseEvent e) {
+        dragInitX = e.getX();
+        dragInitY = e.getY();
     }
 
     public static void main(String[] args) {new Main();}

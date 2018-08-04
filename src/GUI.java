@@ -59,10 +59,24 @@ public abstract class GUI {
 	protected abstract void redraw(Graphics g);
 
 	/**
-	 * Is called when the mouse is clicked (actually, when the mouse is
-	 * released), and is passed the MouseEvent object for that click.
+	 * Is called when the mouse is clicked and is passed the MouseEvent object for that click.
 	 */
 	protected abstract void onClick(MouseEvent e);
+
+	/**
+	 * Is called when the scroll wheel is used, and is passed a MouseWheelEvent.
+	 */
+	protected abstract void onScroll(MouseWheelEvent e);
+
+	/**
+	 * Is called when the mouse is dragged and is padded a MouseMotionEvent
+	 */
+	protected abstract void onDrag(MouseEvent e);
+
+	/**
+	 * Is called when the mouse is pressed and is passed a MouseEvent.
+	 */
+	protected abstract void onPress(MouseEvent e);
 
 	/**
 	 * Is called whenever the search box is updated. Use getSearchBox to get the
@@ -375,7 +389,7 @@ public abstract class GUI {
 		drawing.setVisible(true);
 
 		drawing.addMouseListener(new MouseAdapter() {
-			public void mouseReleased(MouseEvent e) {
+			public void mouseClicked(MouseEvent e) {
 				onClick(e);
 				redraw();
 			}
@@ -383,6 +397,22 @@ public abstract class GUI {
 
 		drawing.addMouseWheelListener(new MouseAdapter() {
 			public void mouseWheelMoved(MouseWheelEvent e) {
+				onScroll(e);
+				redraw();
+			}
+		});
+
+		drawing.addMouseMotionListener(new MouseAdapter() {
+			public void mouseDragged(MouseEvent e) {
+				onDrag(e);
+				redraw();
+			}
+		});
+
+		drawing.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				onPress(e);
+				redraw();
 			}
 		});
 

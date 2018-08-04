@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +77,10 @@ public class SquaresExample extends GUI {
 	protected void onLoad(File nodes, File roads, File segments, File polygons) {
 		getTextOutputArea().setText("example doesn't load any files.");
 	}
+
+	protected void onDrag(MouseEvent e) {}
+	protected void onScroll(MouseWheelEvent e) {}
+	protected void onPress(MouseEvent e) {}
 
 	/**
 	 * A simple inner class that stores the data for the squares and has some
