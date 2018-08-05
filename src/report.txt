@@ -1,0 +1,33 @@
+What it does:
+    - My program will read the selected data and draw a map, from that the program will construct a graph.
+    - The map can be zoomed and panned, using both the buttons on the GUI and the mouse and scroll wheel.
+    - The user can select intersections with the mouse, and the data related to that intersection is shown,
+        including what roads meet at the intersection, with no duplicate road names.
+    - Road names and prefixes can be searched, this will highlight all matches and show information about
+        the roads.
+        - If an exact road name is searched, it will not show all of the ones for which that is a duplicate.
+
+    (in terms of the marking schedule, I think it does everything not including challenge,
+        and it also has the GUI improved by allowing mouse navigation of the map)
+
+Important Data Structures:
+    - One of the main important data structures which I used to represent the roads was a graph.
+        - It was made up of 3 parts, nodes, segments, and roads.
+            - Roads hold all the data about themselves, as well as a list of the segments which make up the road.
+            - Segments hold all of the data about themselves (including list of points making up the segment),
+                as well as a reference to the nodes at each end.
+            - Nodes hold all the data about themselves (including a location), and a list of the segments which meet at the node.
+        - A better way of describing it is that I used an adjacency list to store the required data.
+
+    - Another important data structure which I used was a Trie.
+        - This is a tree which enables fast searching for a work (or in this case, prefix).
+        - For each item added to the tree, nodes were added to spell out its name, this means
+            that you can find every item which begins with "cotton" (for example) without having
+            to loop through every item.
+        - The main parts of this were the Trie, and the TrieNode
+            - The Trie was a containing class, which enabled easy interaction with the nodes.
+            - TrieNode is what stored the actual data, along with the character associated with each node.
+
+Testing:
+    - Unfortunately I didn't make any unit tests, instead I used the program in as many ways as I thought a regular user would (and
+        some ways I thought they wouldn't).

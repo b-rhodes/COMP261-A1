@@ -70,6 +70,14 @@ public class Main extends GUI {
      */
     protected void onLoad(File nodes, File roads, File segments, File polygons) {
 
+        // Reset some variables
+        origin = Location.newFromLatLon(-36.847622, 174.763444 );
+        scale = 90;
+        zoomFactor = 1;
+        highlightN = null;
+        highlightR = null;
+
+
         // Streams the lines of the file into Nodes, which are put into a map (node
         nodeMap = getStream(nodes).map(array ->
                 new Node(Integer.parseInt(array[0]), Double.parseDouble(array[1]), Double.parseDouble(array[2])))
@@ -138,7 +146,7 @@ public class Main extends GUI {
 
         //Highlighted:
         if(highlightN != null) { // Return if there is no highlighted node
-            Object[] rNames = highlightN.getSegmentList().stream().map(s -> s.getRoad()).distinct().map(r -> r.getRoadName()).toArray(); // Get an array of all the road names attached to the node
+            Object[] rNames = highlightN.getSegmentList().stream().map(s -> s.getRoad()).map(r -> r.getRoadName()).distinct().toArray(); // Get an array of all the road names attached to the node
             String nodeDesc = "Intersection ID: " + highlightN.getNodeID() + "\nRoads:";
             for (Object r : rNames) { // Add road names
                 nodeDesc += r + ", ";
@@ -215,6 +223,7 @@ public class Main extends GUI {
 
         // Change the scale.
         zoomFactor += dz;
+        if(zoomFactor < 0) {zoomFactor = 0;} // Don't let it zoom out too far
         if(dz != 0) {
             scale = zoomFactor * 90;
         }
@@ -284,6 +293,7 @@ public class Main extends GUI {
      */
     protected void onScroll(MouseWheelEvent e) {
         zoomFactor += e.getPreciseWheelRotation() * -0.1;
+        if(zoomFactor < 0) {zoomFactor = 0;} // Don't let it zoom out too far
         scale = zoomFactor * 90;
     }
 
