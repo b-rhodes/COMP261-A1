@@ -1,13 +1,10 @@
 //import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import Trie.Trie;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import java.util.Arrays;
@@ -238,7 +235,6 @@ public class Main extends GUI {
         if(highlightR != null) {
             highlightR.stream().forEach(r->r.getSegmentList().stream().forEach(s->s.highlight()));
         }
-
         // Get the search
         String search = getSearchBox().getText();
         // Get the road
